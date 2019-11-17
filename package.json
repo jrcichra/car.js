@@ -1,0 +1,26 @@
+{
+  "name": "car.js",
+  "version": "1.0.0",
+  "description": "An electron app that gets you from point A to point B",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "repository": "https://github.com/jrcichra/car.js",
+  "keywords": [
+    "Electron"
+  ],
+  "author": "Justin Cichra",
+  "license": "CC0-1.0",
+  "devDependencies": {
+    "electron": "^7.0.0",
+    "electron-rebuild": "^1.8.6"
+  },
+  "dependencies": {
+    "@mapbox/mapbox-gl-directions": "^4.0.2",
+    "electron-renderify": "0.0.2",
+    "gps": "^0.5.3",
+    "osrm-text-instructions": "^0.13.4",
+    "serialport": "^8.0.5"
+  }
+}
