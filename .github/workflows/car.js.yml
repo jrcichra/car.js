@@ -37,7 +37,3 @@ jobs:
     - name: tileserver start
       run: |
         docker run -d --name=tileserver --volume=${PWD}/pa/osm-2017-07-03-v3.6.1-us_pennsylvania.mbtiles:/var/www/osm-2017-07-03-v3.6.1-us_pennsylvania.mbtiles -p80:80 jrcichra/tileserver-php-rpi
-    - name: curl check
-      run: |
-        curl 127.0.0.1
-        curl 127.0.0.1:5000
