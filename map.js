@@ -41,23 +41,27 @@ map.on('load', function () {
     require('electron').ipcRenderer.on('gps-update', (event, message) => {
         //update the marker on the map where we currently are
         // console.log(message);
-        map.getSource('current_position').setData({
-            "type": "Point",
-            "coordinates": [message.lon, message.lat]
-        });
+        if (message.lat == null || message.lon == null) {
 
-        if (message.speed > 1) {
-            map.setPitch(60);
-            map.setZoom(18);
-            map.setCenter([message.lon, message.lat]);
+        } else {
+            map.getSource('current_position').setData({
+                "type": "Point",
+                "coordinates": [message.lon, message.lat]
+            });
 
-            function animation() {
-                map.rotateTo(message.bearing, {
-                    duration: .5
-                });
-                requestAnimationFrame(animation);
+            if (message.speed > 1) {
+                map.setPitch(60);
+                map.setZoom(18);
+                map.setCenter([message.lon, message.lat]);
+
+                function animation() {
+                    map.rotateTo(message.bearing, {
+                        duration: .5
+                    });
+                    requestAnimationFrame(animation);
+                }
+                animation();
             }
-            animation();
         }
 
     });
