@@ -1,0 +1,43 @@
+name: car.js
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [13.x]
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node-version }}
+    - name: yarn
+      run: |
+        yarn install
+    - name: download maps
+      run: |
+        mkdir pa && cd pa
+        wget https://justinlearns.tk/pa/osm-2017-07-03-v3.6.1-us_pennsylvania.mbtiles
+        wget https://justinlearns.tk/pa/pennsylvania-latest.osm.pbf
+        cd ..
+    - name: osrm calcuations
+      run: |
+        docker run -t -v "${PWD}/pa:/data" jrcichra/osrm-backend-rpi osrm-extract -p /opt/car.lua /data/pennsylvania-latest.osm.pbf
+        docker run -t -v "${PWD}/pa:/data" jrcichra/osrm-backend-rpi osrm-partition /data/pennsylvania-latest.osrm
+        docker run -t -v "${PWD}/pa:/data" jrcichra/osrm-backend-rpi osrm-customize /data/pennsylvania-latest.osrm
+    - name: osrm start
+      run: |
+        docker run -d -v "${PWD}/pa:/data" --name=osrm -p5000:5000  jrcichra/osrm-backend-rpi osrm-routed /data/pennsylvania-latest.osrm
+    - name: tileserver start
+      run: |
+        docker run -d --name=tileserver --volume=${PWD}/pa/osm-2017-07-03-v3.6.1-us_pennsylvania.mbtiles:/var/www/osm-2017-07-03-v3.6.1-us_pennsylvania.mbtiles -p80:80 jrcichra/tileserver-php-rpi
+    - name: curl check
+      run: |
+        curl 127.0.0.1
+        curl 127.0.0.1:5000
