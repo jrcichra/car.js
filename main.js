@@ -4,6 +4,7 @@ const {
   BrowserWindow
 } = require('electron')
 const path = require('path')
+const fs = require('fs');
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -37,6 +38,8 @@ function gpsStuff() {
 
     //make sure the checksum is good
     if (data.valid) {
+	  //write to file
+      fs.appendFileSync('data.log',JSON.stringify(data));
       //only pass on what mapbox cares about
       let o = {
         lat: data.lat,
