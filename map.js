@@ -1,9 +1,14 @@
-var version = 'v5';
+const version = 'v5';
 var osrmTextInstructions = require('osrm-text-instructions')(version);
 var map = new mapboxgl.Map({
     container: 'map',
     style: 'styles/osm-bright/style.json'
 });
+var electron = require('electron');
+var ipc = electron.ipcRenderer;
+
+var direction_request = 0;
+
 var d = new MapboxDirections({
     accessToken: mapboxgl.accessToken,
     api: 'http://127.0.0.1:5000/route/v1/',
@@ -13,7 +18,13 @@ var d = new MapboxDirections({
     steps: true,
     compile: function (language, step, options) {
         instruction = osrmTextInstructions.compile(language, step, options);
-        console.log(instruction);
+        //send this instruction to the backend so we can speak it!
+        ipc.send("osrm", {
+            "instruction": instruction,
+            "step": step,
+            "options": options,
+            "request": direction_request
+        });
         return instruction;
         //return this.tokenize(language, instruction, replaceTokens, options);
     },
@@ -38,7 +49,7 @@ map.on('load', function () {
             "circle-color": "#007cbf"
         }
     });
-    require('electron').ipcRenderer.on('gps-update', (event, message) => {
+    electron.ipcRenderer.on('gps-update', (event, message) => {
         //update the marker on the map where we currently are
         // console.log(message);
         if (message.lat == null || message.lon == null) {
@@ -65,4 +76,16 @@ map.on('load', function () {
         }
 
     });
+
+    //Handle changes to the dropdowns
+    let start_point = document.getElementById("start_point");
+    start_point.addEventListener("change", function () {
+        d.setOrigin(start_point.value.split(','))
+    });
+    let end_point = document.getElementById("end_point");
+    end_point.addEventListener("change", function () {
+        d.setDestination(end_point.value.split(','))
+        direction_request += 1; //this lets us know what steps are from a new set
+    });
+
 })

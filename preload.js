@@ -11,4 +11,4 @@ window.addEventListener('DOMContentLoaded', () => {
   }
 })
 
-console.log("Done with prelog");
+console.log("Done with preload");
