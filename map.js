@@ -88,4 +88,10 @@ map.on('load', function () {
         direction_request += 1; //this lets us know what steps are from a new set
     });
 
+    //when they're going the wrong way, update the origin and let the directions api fire off new directions
+    electron.ipcRenderer.on('wrong_way', (event, message) => {
+        console.log(`going the wrong way, got a message of ${message}`);
+        d.setOrigin(message.lon, message.lat);
+    });
+
 })
