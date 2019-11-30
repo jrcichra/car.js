@@ -224,7 +224,7 @@ function gpsSetup() {
 
 
   var gps = new GPS;
-  fakeGPS();
+  // fakeGPS();
   gps.on('RMC', function (data) {
 
     //make sure the checksum is good
