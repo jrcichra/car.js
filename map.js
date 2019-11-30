@@ -29,6 +29,7 @@ var d = new MapboxDirections({
         //return this.tokenize(language, instruction, replaceTokens, options);
     },
 });
+console.log(d);
 map.addControl(d, 'top-left');
 
 map.on('load', function () {
@@ -62,7 +63,7 @@ map.on('load', function () {
 
             if (message.speed > 1) {
                 map.setPitch(60);
-                map.setZoom(18);
+                map.setZoom(15);
                 map.setCenter([message.lon, message.lat]);
 
                 function animation() {
@@ -71,7 +72,7 @@ map.on('load', function () {
                     });
                     requestAnimationFrame(animation);
                 }
-                animation();
+                // animation();
             }
         }
 
@@ -89,9 +90,11 @@ map.on('load', function () {
     });
 
     //when they're going the wrong way, update the origin and let the directions api fire off new directions
-    electron.ipcRenderer.on('wrong_way', (event, message) => {
-        console.log(`going the wrong way, got a message of ${message}`);
-        d.setOrigin(message.lon, message.lat);
+    electron.ipcRenderer.on('wrong-way', (event, message) => {
+        // console.log(`going the wrong way, got a message of...`);
+        // console.log(message);
+        direction_request += 1; //this lets us know what steps are from a new set
+        d.setOrigin([message.lon, message.lat]);
     });
 
 })
