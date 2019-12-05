@@ -15,6 +15,12 @@ var GPS = require('gps');
 var convert = require('convert-units');
 var polyline = require('@mapbox/polyline');
 
+//do we want a fake gps or not
+let fakegps = true;
+
+//are we navigating right now?
+let navigating = false;
+
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow;
@@ -32,9 +38,6 @@ let current_pos;
 let wrong_way = 0;
 let last_poly_distance = -1;
 
-let gpsLoopId; //for clearInterval inside itself
-let gpsDirectionPoll = 500; //setInterval ms to do a gpsLoop()  
-
 let spoke = {
   quarter: false,
   half: false,
@@ -50,8 +53,37 @@ let spoke = {
 
 let look_at_last = false;
 
+function fakeGPS() {
+  //read the data from a file and make applicable portions of the file available
+  let fake_gps_data = JSON.parse(fs.readFileSync('data.json'), 'utf8');
+  let start_with = 1000;
+  let end_with = fake_gps_data.length - 1;
+  let first_time = new Date(fake_gps_data[start_with].time);
+  for (let i = start_with; i < end_with; i++) {
+    let start_time = new Date(fake_gps_data[i].time);
+    //we actually make all the functions for the whole trip in one go - setting timeouts
+    setTimeout(() => {
+      let o = {
+        lat: fake_gps_data[i].lat,
+        lon: fake_gps_data[i].lon,
+        time: fake_gps_data[i].time,
+        //convert speed to mph from kph
+        speed: fake_gps_data[i].speed / 1.609,
+        bearing: fake_gps_data[i].track
+      }
+      mainWindow.webContents.send('gps-update', o);
+      current_pos = o;
+      if (navigating) {
+        gpsLoop();
+      }
+    }, start_time.getTime() - first_time.getTime());
+  }
+
+}
+
+
 function gpsLoop() {
-  // call this on an interval, and it will calculate the distance between where the GPS is 
+  // call this after you send a gps update, and it will calculate the distance between where the GPS is 
   // and where the next direction manuever is
   // this can trigger espeak based on how far away we want certain things said
   // it can also increment what manuever we are going to next
@@ -94,10 +126,8 @@ function gpsLoop() {
     if (direction_index >= directions.length - 1) {
       //This was the last direction. They should be at their destination
       speak("You have arrived at your destination.");
-      //end the gps loop (with clearinterval) and also clear the variable so new directions can start a new looper
-      let temp = gpsLoopId;
-      gpsLoopId = undefined;
-      clearInterval(temp);
+      //end the navigation
+      navigating = false;
     } else if (distance <= .02) {
       //do the manuever
       if (!spoke.zero) {
@@ -152,15 +182,15 @@ function gpsLoop() {
     //see if we're going away from our next poly (this is used for recalculating)
     if (last_poly_distance == -1) {
       //we don't have a last_distance, don't worry about it
-    } else if (poly_distance > last_poly_distance && Math.abs(last_poly_distance - poly_distance) > .001) {
-      //we are farther away from our last point and outside the margin of error. Increment the wrong way counter
-      wrong_way += 1;
     } else if (poly_distance < .04) {
       //we must have hit the poly - increment the poly counter
       if (poly_index + 1 < directions[direction_index - 1].polycoord.length) {
         poly_index += 1;
       }
       wrong_way = 0;
+    } else if (poly_distance > last_poly_distance && Math.abs(last_poly_distance - poly_distance) > .001) {
+      //we are farther away from our last point and outside the margin of error. Increment the wrong way counter
+      wrong_way += 1;
     } else {
       //We must be getting closer. No issue here. reset wrong_way to 0
       wrong_way = 0;
@@ -188,8 +218,6 @@ function gpsLoop() {
         instead of shared variables and an event loop
       */
 
-      //speak that we're recalculating
-      speak("Recalculating.");
       look_at_last = false;
 
 
@@ -224,38 +252,43 @@ function gpsSetup() {
 
 
   var gps = new GPS;
-  // fakeGPS();
-  gps.on('RMC', function (data) {
+  if (!fakegps) {
+    gps.on('RMC', function (data) {
 
-    //make sure the checksum is good
-    if (data.valid) {
-      //write to file
-      fs.appendFileSync('data.log', JSON.stringify(data));
-      //only pass on what mapbox cares about
-      let o = {
-        lat: data.lat,
-        lon: data.lon,
-        time: data.time,
-        //convert speed to mph from kph
-        speed: data.speed / 1.609,
-        bearing: data.track
+      //make sure the checksum is good
+      if (data.valid) {
+        //write to file
+        fs.appendFileSync('data.log', JSON.stringify(data));
+        //only pass on what mapbox cares about
+        let o = {
+          lat: data.lat,
+          lon: data.lon,
+          time: data.time,
+          //convert speed to mph from kph
+          speed: data.speed / 1.609,
+          bearing: data.track
+        }
+
+        // when we get gps data, send it to the client to handle
+        mainWindow.webContents.send('gps-update', o);
+        //also set this as our current position, so we can have a process calculate the distance to the next manuever
+        current_pos = o;
+        if (navigating) {
+          gpsLoop();
+        }
+        // console.log(gps.state);
+        // console.log(gps.state.lat);
+      } else {
+        console.log("We got bad data from the GPS (checksum)");
       }
+    });
 
-      // when we get gps data, send it to the client to handle
-      mainWindow.webContents.send('gps-update', o);
-      //also set this as our current position, so we can have a process calculate the distance to the next manuever
-      current_pos = o;
-
-      // console.log(gps.state);
-      // console.log(gps.state.lat);
-    } else {
-      console.log("We got bad data from the GPS (checksum)");
-    }
-  });
-
-  parser.on('data', function (data) {
-    gps.update(data);
-  });
+    parser.on('data', function (data) {
+      gps.update(data);
+    });
+  } else {
+    fakeGPS();
+  }
 }
 
 async function speak(message) {
@@ -311,6 +344,7 @@ function createWindow() {
         dir.polycoord = polyline.decode(dir.step.geometry);
         directions.push(dir);
       } else {
+        navigating = true;
         //This is a new set of directions, update the number, clean the directions, and append this new one
         directions_request = dir.request;
         directions = [];
@@ -320,7 +354,12 @@ function createWindow() {
         //to say more when we get close enough to the next point, and the next, etc.
 
         //This only gets us started, so when we plug in directions, it speaks it
-        speak(dir.instruction);
+        let sentence = "";
+        if (directions_request > 1) {
+          sentence += "Recalculating. ";
+        }
+        sentence += dir.instruction;
+        speak(sentence);
 
         //While that's speaking, we want to be calculating our position and the distance to the next maneuver
         // if we get too far away, we should recalculate a route (which, who knows, might have a u-turn)
@@ -330,10 +369,6 @@ function createWindow() {
         //reset the poly index
         poly_index = 0;
 
-        if (gpsLoopId == undefined) {
-          //we need to start up a gps loop
-          gpsLoopId = setInterval(gpsLoop, gpsDirectionPoll);
-        }
       }
       // console.log(util.inspect(arg, false, null, true /* enable colors */ ));
     });
