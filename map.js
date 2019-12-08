@@ -16,6 +16,12 @@ var d = new MapboxDirections({
     language: '',
     alternatives: false,
     steps: true,
+    controls: {
+        inputs: false,
+        instructions: true,
+        profileSwitcher: false
+    },
+    flyTo: false,
     compile: function (language, step, options) {
         instruction = osrmTextInstructions.compile(language, step, options);
         //send this instruction to the backend so we can speak it!
@@ -29,7 +35,7 @@ var d = new MapboxDirections({
         //return this.tokenize(language, instruction, replaceTokens, options);
     },
 });
-console.log(d);
+// console.log(d);
 map.addControl(d, 'top-left');
 
 map.on('load', function () {
@@ -72,7 +78,7 @@ map.on('load', function () {
                     });
                     requestAnimationFrame(animation);
                 }
-                // animation();
+                animation();
             }
         }
 

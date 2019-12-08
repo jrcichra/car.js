@@ -128,7 +128,7 @@ function gpsLoop() {
       speak("You have arrived at your destination.");
       //end the navigation
       navigating = false;
-    } else if (distance <= .02) {
+    } else if (distance <= .05) {
       //do the manuever
       if (!spoke.zero) {
         //say the instruction if they should do the manuever
@@ -182,7 +182,7 @@ function gpsLoop() {
     //see if we're going away from our next poly (this is used for recalculating)
     if (last_poly_distance == -1) {
       //we don't have a last_distance, don't worry about it
-    } else if (poly_distance < .04) {
+    } else if (poly_distance < .05) {
       //we must have hit the poly - increment the poly counter
       if (poly_index + 1 < directions[direction_index - 1].polycoord.length) {
         poly_index += 1;
