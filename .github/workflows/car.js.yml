@@ -23,8 +23,8 @@ jobs:
     - name: download maps
       run: |
         mkdir pa && cd pa
-        wget https://justinlearns.tk/pa/osm-2017-07-03-v3.6.1-us_pennsylvania.mbtiles
-        wget https://justinlearns.tk/pa/pennsylvania-latest.osm.pbf
+        wget https://jcovh.us.to/pa/osm-2017-07-03-v3.6.1-us_pennsylvania.mbtiles
+        wget https://jcovh.us.to/pa/pennsylvania-latest.osm.pbf
         cd ..
     - name: osrm calcuations
       run: |
