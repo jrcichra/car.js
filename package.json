@@ -4,7 +4,8 @@
   "description": "An electron app that gets you from point A to point B",
   "main": "main.js",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "rebuild": "electron-rebuild"
   },
   "repository": "https://github.com/jrcichra/car.js",
   "keywords": [

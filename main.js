@@ -19,7 +19,7 @@ var polyline = require('@mapbox/polyline');
 let fakegps = true;
 
 //are we navigating right now?
-let navigating = false;
+let navigating = true;
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -56,7 +56,7 @@ let look_at_last = false;
 function fakeGPS() {
   //read the data from a file and make applicable portions of the file available
   let fake_gps_data = JSON.parse(fs.readFileSync('data.json'), 'utf8');
-  let start_with = 1000;
+  let start_with = 2450;
   let end_with = fake_gps_data.length - 1;
   let first_time = new Date(fake_gps_data[start_with].time);
   for (let i = start_with; i < end_with; i++) {
@@ -76,6 +76,7 @@ function fakeGPS() {
       if (navigating) {
         gpsLoop();
       }
+      //speed divider if needed
     }, start_time.getTime() - first_time.getTime());
   }
 
@@ -172,7 +173,7 @@ function gpsLoop() {
       //if they're coming out of a manuever and they're not in range of any of the above statements
       look_at_last = false;
       if (!spoke.first) {
-        speak(`In ${Math.round(distance*10)/10} miles, ${directions[direction_index].instruction}`);
+        speak(`In ${Math.round(distance * 10) / 10} miles, ${directions[direction_index].instruction}`);
         spoke.first = true;
       }
     } else {
@@ -244,15 +245,13 @@ function gpsSetup() {
     delimiter: '\r\n'
   });
 
-  const port = new SerialPort(file, {
-    baudRate: 9600
-  });
-
-  port.pipe(parser);
-
-
   var gps = new GPS;
   if (!fakegps) {
+    const port = new SerialPort(file, {
+      baudRate: 9600
+    });
+
+    port.pipe(parser);
     gps.on('RMC', function (data) {
 
       //make sure the checksum is good
@@ -344,6 +343,8 @@ function createWindow() {
         dir.polycoord = polyline.decode(dir.step.geometry);
         directions.push(dir);
       } else {
+        //Update our origin
+        mainWindow.webContents.send('set-origin', current_pos);
         navigating = true;
         //This is a new set of directions, update the number, clean the directions, and append this new one
         directions_request = dir.request;

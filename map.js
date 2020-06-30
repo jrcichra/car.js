@@ -39,6 +39,13 @@ var d = new MapboxDirections({
 map.addControl(d, 'top-left');
 
 map.on('load', function () {
+    //Get image of car
+    map.loadImage(
+        'http://localhost/car.png',
+        function (error, image) {
+            if (error) throw error;
+            map.addImage('car', image);
+        });
     //add a point with a name on the map at 0,0 when it loads
     map.addSource('current_position', {
         "type": "geojson",
@@ -50,10 +57,10 @@ map.on('load', function () {
     map.addLayer({
         "id": "current_position",
         "source": "current_position",
-        "type": "circle",
-        "paint": {
-            "circle-radius": 10,
-            "circle-color": "#007cbf"
+        "type": "symbol",
+        'layout': {
+            'icon-image': 'car',
+            'icon-size': 0.05
         }
     });
     electron.ipcRenderer.on('gps-update', (event, message) => {
@@ -72,7 +79,7 @@ map.on('load', function () {
                 map.setZoom(15);
                 map.setCenter([message.lon, message.lat]);
 
-                function animation() {
+                async function animation() {
                     map.rotateTo(message.bearing, {
                         duration: .5
                     });
@@ -85,10 +92,6 @@ map.on('load', function () {
     });
 
     //Handle changes to the dropdowns
-    let start_point = document.getElementById("start_point");
-    start_point.addEventListener("change", function () {
-        d.setOrigin(start_point.value.split(','))
-    });
     let end_point = document.getElementById("end_point");
     end_point.addEventListener("change", function () {
         d.setDestination(end_point.value.split(','))
@@ -102,5 +105,10 @@ map.on('load', function () {
         direction_request += 1; //this lets us know what steps are from a new set
         d.setOrigin([message.lon, message.lat]);
     });
-
+    //Backend tells us to update the starting position (which should usually be the current position after a directions request)
+    electron.ipcRenderer.on('set-origin', (event, message) => {
+        d.setOrigin([message.lon, message.lat])
+    });
+    //Dummy origin placement so the proper events are fired
+    d.setOrigin([0, 0])
 })
