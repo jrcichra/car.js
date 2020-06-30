@@ -14,16 +14,16 @@
   "author": "Justin Cichra",
   "license": "CC0-1.0",
   "devDependencies": {
-    "electron": "^7.0.0",
-    "electron-rebuild": "^1.8.6"
+    "electron": "^9.0.5",
+    "electron-rebuild": "^1.11.0"
   },
   "dependencies": {
-    "@mapbox/mapbox-gl-directions": "^4.0.2",
-    "@mapbox/polyline": "^1.1.0",
+    "@mapbox/mapbox-gl-directions": "^4.0.3",
+    "@mapbox/polyline": "^1.1.1",
     "convert-units": "^2.3.4",
     "electron-renderify": "0.0.2",
     "gps": "^0.5.3",
-    "osrm-text-instructions": "^0.13.4",
-    "serialport": "^8.0.5"
+    "osrm-text-instructions": "^0.14.1-beta.3",
+    "serialport": "^9.0.0"
   }
 }

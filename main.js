@@ -77,7 +77,7 @@ function fakeGPS() {
         gpsLoop();
       }
       //speed divider if needed
-    }, (start_time.getTime() - first_time.getTime()) / 1);
+    }, (start_time.getTime() - first_time.getTime()) / 5);
   }
 
 }
