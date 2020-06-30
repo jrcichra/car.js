@@ -292,20 +292,25 @@ function gpsSetup() {
 
 async function speak(message) {
   console.log(`###### espeak should be saying: '${message}' ######`);
-  //use that message as an argument to espeak with quotes around it
-  let espeak = spawn('espeak', ["'" + message + "'"]);
+  //kill any old espeaks that may still be speaking!
+  let kill = spawn("killall", ["espeak"]);
+  kill.on('close', code => {
+    //use that message as an argument to espeak with quotes around it
+    let espeak = spawn('espeak', ["'" + message + "'"]);
 
-  //capture output for espeak (if there are any errors) to the console
-  espeak.stdout.on('data', data => {
-    // console.log(`stdout: ${data}`);
+    //capture output for espeak (if there are any errors) to the console
+    espeak.stdout.on('data', data => {
+      // console.log(`stdout: ${data}`);
+    });
+    espeak.stderr.on('data', data => {
+      // console.log(`stderr:${data}`);
+    });
+    //handle anything that should be done after espeak is done speaking
+    espeak.on('close', code => {
+      // console.log(`espeak ended with code ${code}`);
+    });
   });
-  espeak.stderr.on('data', data => {
-    // console.log(`stderr:${data}`);
-  });
-  //handle anything that should be done after espeak is done speaking
-  espeak.on('close', code => {
-    // console.log(`espeak ended with code ${code}`);
-  });
+
 
 }
 
