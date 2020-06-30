@@ -94,6 +94,8 @@ map.on('load', function () {
     //Handle changes to the dropdowns
     let end_point = document.getElementById("end_point");
     end_point.addEventListener("change", function () {
+        //Ask and set a new origin point
+        ipc.send("get-origin");
         d.setDestination(end_point.value.split(','))
         direction_request += 1; //this lets us know what steps are from a new set
     });
@@ -109,6 +111,4 @@ map.on('load', function () {
     electron.ipcRenderer.on('set-origin', (event, message) => {
         d.setOrigin([message.lon, message.lat])
     });
-    //Dummy origin placement so the proper events are fired
-    d.setOrigin([0, 0])
 })

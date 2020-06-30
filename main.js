@@ -56,7 +56,7 @@ let look_at_last = false;
 function fakeGPS() {
   //read the data from a file and make applicable portions of the file available
   let fake_gps_data = JSON.parse(fs.readFileSync('data.json'), 'utf8');
-  let start_with = 2450;
+  let start_with = 200;
   let end_with = fake_gps_data.length - 1;
   let first_time = new Date(fake_gps_data[start_with].time);
   for (let i = start_with; i < end_with; i++) {
@@ -77,7 +77,7 @@ function fakeGPS() {
         gpsLoop();
       }
       //speed divider if needed
-    }, start_time.getTime() - first_time.getTime());
+    }, (start_time.getTime() - first_time.getTime()) / 1);
   }
 
 }
@@ -334,6 +334,11 @@ function createWindow() {
 
     gpsSetup();
 
+    ipc.on('get-origin', function (event, dir) {
+      //Update our origin
+      mainWindow.webContents.send('set-origin', current_pos);
+    });
+
     // let the backend get direction information to act on with system stuff
     ipc.on('osrm', function (event, dir) {
       // see if we got a new set of directions or not
@@ -343,8 +348,6 @@ function createWindow() {
         dir.polycoord = polyline.decode(dir.step.geometry);
         directions.push(dir);
       } else {
-        //Update our origin
-        mainWindow.webContents.send('set-origin', current_pos);
         navigating = true;
         //This is a new set of directions, update the number, clean the directions, and append this new one
         directions_request = dir.request;
