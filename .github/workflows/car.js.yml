@@ -22,7 +22,7 @@ jobs:
       - name: download maps
         run: |
           mkdir pa && cd pa
-          wget http://129.213.115.182/osm-2017-07-03-v3.6.1-us_pennsylvania.mbtiles
+          wget http://129.213.115.182/2017-07-03_us_pennsylvania.mbtiles
           wget http://129.213.115.182/pennsylvania-latest.osm.pbf
           cd ..
       - name: osrm calcuations
@@ -35,4 +35,4 @@ jobs:
           docker run -d -v "${PWD}/pa:/data" --name=osrm -p5000:5000  jrcichra/osrm-backend-rpi osrm-routed /data/pennsylvania-latest.osrm
       - name: tileserver start
         run: |
-          docker run -d --name=tileserver --volume=${PWD}/pa/osm-2017-07-03-v3.6.1-us_pennsylvania.mbtiles:/var/www/osm-2017-07-03-v3.6.1-us_pennsylvania.mbtiles -p80:80 jrcichra/tileserver-php-rpi
+          docker run -d --name=tileserver --volume=${PWD}/pa/2017-07-03_us_pennsylvania.mbtiles:/var/www/2017-07-03_us_pennsylvania.mbtiles -p80:80 jrcichra/tileserver-php-rpi
