@@ -60,7 +60,8 @@ map.on('load', function () {
         "type": "symbol",
         'layout': {
             'icon-image': 'car',
-            'icon-size': 0.05
+            'icon-size': 0.05,
+            'icon-allow-overlap': true
         }
     });
     electron.ipcRenderer.on('gps-update', (event, message) => {
