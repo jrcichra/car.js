@@ -56,7 +56,7 @@ let look_at_last = false;
 function fakeGPS() {
   //read the data from a file and make applicable portions of the file available
   let fake_gps_data = JSON.parse(fs.readFileSync('data.json'), 'utf8');
-  let start_with = 200;
+  let start_with = 1300;
   let end_with = fake_gps_data.length - 1;
   let first_time = new Date(fake_gps_data[start_with].time);
   for (let i = start_with; i < end_with; i++) {
