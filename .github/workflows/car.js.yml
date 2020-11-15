@@ -19,11 +19,14 @@ jobs:
       - name: yarn
         run: |
           yarn install
+      - name: compile
+        run: |
+          npm rebuild
       - name: download maps
         run: |
           mkdir pa && cd pa
-          wget http://129.213.115.182/2017-07-03_us_pennsylvania.mbtiles
-          wget http://129.213.115.182/pennsylvania-latest.osm.pbf
+          wget https://vps199300.vps.ovh.ca/2017-07-03_us_pennsylvania.mbtiles
+          wget https://vps199300.vps.ovh.ca/pennsylvania-latest.osm.pbf
           cd ..
       - name: osrm calcuations
         run: |
