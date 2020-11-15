@@ -5,7 +5,8 @@
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "rebuild": "electron-rebuild && electron-rebuild -f -w serialport"
+    "rebuild": "electron-rebuild",
+    "serial": "electron-rebuild -f -w serialport"
   },
   "repository": "https://github.com/jrcichra/car.js",
   "keywords": [

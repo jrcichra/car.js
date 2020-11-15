@@ -9,6 +9,23 @@ var ipc = electron.ipcRenderer;
 
 var direction_request = 0;
 
+electron.ipcRenderer.on('locations', (event, locations) => {
+    //clear it out
+    let end_point = document.getElementById("end_point");
+    end_point.innerText = null;
+    //recreate
+    let blank = document.createElement("option");
+    blank.text = "";
+    blank.value = "";
+    end_point.add(blank);
+    for (let l of locations) {
+        let option = document.createElement("option");
+        option.text = l.name;
+        option.value = `${l.lat},${l.lon}`;
+        end_point.add(option);
+    }
+});
+
 var d = new MapboxDirections({
     accessToken: mapboxgl.accessToken,
     api: 'http://127.0.0.1:5000/route/v1/',

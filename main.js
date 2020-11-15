@@ -314,6 +314,16 @@ async function speak(message) {
 
 }
 
+function readAndSendLocations() {
+  fs.readFile(`locations.json`, 'utf8', (err, data) => {
+    if (err) {
+      console.error(err)
+      return
+    }
+    mainWindow.webContents.send('locations', JSON.parse(data));
+  });
+}
+
 function createWindow() {
   // Create the browser window.
   mainWindow = new BrowserWindow({
@@ -336,6 +346,12 @@ function createWindow() {
 
     //maximize - https://github.com/electron/electron/issues/7779
     mainWindow.maximize();
+
+    readAndSendLocations();
+    //when the location file updates, update the gui
+    fs.watchFile(`locations.json`, (curr, prev) => {
+      readAndSendLocations();
+    });
 
     gpsSetup();
 
