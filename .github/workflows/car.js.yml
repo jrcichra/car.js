@@ -21,7 +21,8 @@ jobs:
           yarn install
       - name: compile
         run: |
-          npm rebuild
+          npm run rebuild
+          npm run serial
       - name: download maps
         run: |
           mkdir pa && cd pa
