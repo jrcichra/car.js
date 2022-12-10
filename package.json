@@ -15,7 +15,7 @@
   "author": "Justin Cichra",
   "license": "CC0-1.0",
   "devDependencies": {
-    "electron": "^11.5.0",
+    "electron": "^18.3.7",
     "electron-rebuild": "^2.3.2"
   },
   "dependencies": {
